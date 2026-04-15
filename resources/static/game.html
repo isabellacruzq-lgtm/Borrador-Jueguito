@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♡ Celestial Fury ♡ Batalla ♡</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎀</text></svg>">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/game-features.css">
+</head>
+<body class="game-page">
+
+<div class="game-container">
+    <!-- JUGADOR 1 (Izquierda) -->
+    <div class="player-section player-1">
+        <h2 class="player-title">Tu Equipo</h2>
+
+        <div class="characters-display" id="playerDisplay">
+            <!-- Se llena dinámicamente -->
+        </div>
+
+        <div class="health-bar">
+            <div class="health-fill" id="playerHealthFill" style="width: 100%"></div>
+            <span class="health-text" id="playerHealthText">100 / 100</span>
+        </div>
+    </div>
+
+    <!-- ARENA CENTRAL -->
+    <div class="battle-arena">
+        <div class="arena-title">⚡ BATALLA ⚡</div>
+        <div class="battle-status" id="battleStatus">Conectando con el oponente...</div>
+
+        <!-- Efectos de ataque -->
+        <div class="battle-effects" id="battleEffects"></div>
+    </div>
+
+    <!-- JUGADOR 2 (Derecha) -->
+    <div class="player-section player-2">
+        <h2 class="player-title">Equipo Oponente</h2>
+
+        <div class="characters-display" id="opponentDisplay">
+            <!-- Se llena dinámicamente -->
+        </div>
+
+        <div class="health-bar">
+            <div class="health-fill" id="opponentHealthFill" style="width: 100%"></div>
+            <span class="health-text" id="opponentHealthText">100 / 100</span>
+        </div>
+    </div>
+</div>
+
+<!-- CONTROLES VIRTUALES (Mando de Flores) -->
+<div class="controls-section">
+    <div class="flower-controller" id="controller-container">
+        <!-- Los botones se crean dinámicamente con virtualController.js -->
+    </div>
+</div>
+
+<!-- Modal de Fin de Juego -->
+<div class="modal" id="gameOverModal">
+    <div class="modal-content">
+        <h2 id="gameOverTitle">¡Batalla Finalizada!</h2>
+        <p id="gameOverMessage">Has ganado la batalla!</p>
+        <button class="modal-button" onclick="location.href='index.html'">
+            Volver al Inicio
+        </button>
+    </div>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/gameInit.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/socketClient.js"></script>
+<script src="js/characterManager.js"></script>
+<script src="js/virtualController.js"></script>
+<script src="js/gameController.js"></script>
+<script src="js/app.js"></script>
+<script src="js/difficulty.js"></script>
+<script src="js/enemies.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/controls.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Celestial Fury - Selección de Personajes</title>
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/character-selection.css">
+</head>
+<body class="character-selection-page">
+
+<div class="container">
+    <header class="header">
+        <h1 class="title">♡ CELESTIAL FURY ♡</h1>
+        <p class="subtitle">Selecciona a tu personaje favorito</p>
+    </header>
+
+    <main class="main-content">
+        <div id="name-modal" class="modal show">
+            <div class="modal-content">
+                <h2>✨ ¡Bienvenida! ✨</h2>
+                <p>Ingresa tu nombre de heroína:</p>
+                <input type="text" id="player-name-input" placeholder="Tu nombre aquí...">
+                <button class="modal-button" onclick="savePlayerName()">Entrar</button>
+            </div>
+        </div>
+        <div class="character-selection">
+            <!-- BOMBÓN - Rosa -->
+            <div class="character-card" data-character="bombon">
+                <div class="character-visual">
+                    <img class="character-icon" src="assets/images/characters/bombon-character.png" alt="Bombón">
+                </div>
+                <div class="character-info">
+                    <h3 class="character-name">Bombón</h3>
+                    <p class="character-desc">Inteligente, Responsable y Estratégica</p>
+                </div>
+                <div class="selection-indicator"></div>
+            </div>
+
+            <!-- BURBUJA - Azul -->
+            <div class="character-card" data-character="burbuja">
+                <div class="character-visual">
+                    <img class="character-icon" src="assets/images/characters/burbuja-character.png" alt="Burbuja">
+                </div>
+                <div class="character-info">
+                    <h3 class="character-name">Burbuja</h3>
+                    <p class="character-desc">Dulce, Sensible y Emocional</p>
+                </div>
+                <div class="selection-indicator"></div>
+            </div>
+
+            <!-- BELLOTA - Verde -->
+            <div class="character-card" data-character="bellota">
+                <div class="character-visual">
+                    <img class="character-icon" src="assets/images/characters/bellota-character.png" alt="Bellota">
+                </div>
+                <div class="character-info">
+                    <h3 class="character-name">Bellota</h3>
+                    <p class="character-desc">Ruda, Valiente e Impulsiva</p>
+                </div>
+                <div class="selection-indicator"></div>
+            </div>
+
+            <!-- BRISA - Lila -->
+            <div class="character-card" data-character="brisa">
+                <div class="character-visual">
+                    <img class="character-icon" src="assets/images/characters/brisa-character.png" alt="Brisa">
+                </div>
+                <div class="character-info">
+                    <h3 class="character-name">Brisa</h3>
+                    <p class="character-desc">Mística, Inteligente y Poderosa</p>
+                </div>
+                <div class="selection-indicator"></div>
+            </div>
+        </div>
+
+        <!-- Panel de Resumen -->
+        <div class="summary-panel">
+            <h2>Personajes Seleccionados</h2>
+            <div id="selected-count" class="selected-count">0 / 2</div>
+            <div id="selected-characters" class="selected-list"></div>
+            <button id="start-button" class="start-button" disabled>
+                ¡COMENZAR BATALLA!
+            </button>
+        </div>
+    </main>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/socketClient.js"></script>
+<script src="js/characterManager.js"></script>
+<script src="js/app.js"></script>
+<script src="js/playerName.js"></script>
+</body>
+</html>

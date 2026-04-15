@@ -1,0 +1,306 @@
+/*
+ * game-features.css
+ * Estilos para todas las nuevas clases de Celestial Fury:
+ *   AnimationSystem · EnemyManager · DifficultyManager · MultiplayerControls
+ *
+ * Importar después de styles.css:
+ *   <link rel="stylesheet" href="css/game-features.css">
+ */
+
+/* ══════════════════════════════════════════════════════════════
+   1. ATAQUE FLOTANTE  (.anim-attack-float)
+   ══════════════════════════════════════════════════════════════ */
+.anim-attack-float {
+  position: absolute;
+  display:  flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 30;
+  animation: attackFloatUp 0.9s ease-out forwards;
+}
+
+/* Posición según lado del atacante */
+.anim-attack-float--left   { left: 20%; top: 40%; }
+.anim-attack-float--right  { right: 20%; top: 40%; }
+.anim-attack-float--center { left: 45%; top: 35%; }
+
+.anim-burst {
+  font-size: 2.4rem;
+  animation: burstPop 0.35s ease-out both;
+}
+
+.anim-char-emoji {
+  font-size: 1.8rem;
+  margin-top: -6px;
+  animation: charRise 0.9s ease-out forwards;
+}
+
+@keyframes attackFloatUp {
+  0%   { opacity: 1; transform: translateY(0)   scale(1);    }
+  60%  { opacity: 1; transform: translateY(-30px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(0.6); }
+}
+@keyframes burstPop {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+@keyframes charRise {
+  0%   { transform: translateY(10px); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateY(-20px); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. ONDA CIRCULAR PULSANTE  (.anim-wave-pulse)
+   ══════════════════════════════════════════════════════════════ */
+.anim-wave-pulse {
+  position:      absolute;
+  left:          50%;
+  top:           50%;
+  width:         0;
+  height:        0;
+  border-radius: 50%;
+  border:        4px solid var(--wave-color, #FF69B4);
+  transform:     translate(-50%, -50%);
+  pointer-events: none;
+  z-index:       20;
+  animation:     wavePulse 0.7s ease-out forwards;
+}
+
+@keyframes wavePulse {
+  0%   { width:   0px; height:   0px; opacity: 1; }
+  70%  { width: 220px; height: 220px; opacity: 0.6; }
+  100% { width: 280px; height: 280px; opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. PARPADEO BLANCO EN ENEMIGO  (.anim-hit-flash)
+   ══════════════════════════════════════════════════════════════ */
+.anim-hit-flash {
+  animation: hitFlash 0.5s steps(1) forwards;
+}
+
+@keyframes hitFlash {
+  0%,  20%, 40%, 60%, 80%   { filter: brightness(1); }
+  10%, 30%, 50%, 70%, 90%   { filter: brightness(10) saturate(0); }
+  100%                       { filter: brightness(1); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. PARTÍCULAS  (.anim-particle)
+   ══════════════════════════════════════════════════════════════ */
+.anim-particle {
+  position:       absolute;
+  pointer-events: none;
+  z-index:        25;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  animation:      particleFly 0.8s ease-out forwards;
+}
+
+@keyframes particleFly {
+  0%   { transform: translate(0, 0) scale(1);    opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. TEXTO FLOTANTE DE PUNTUACIÓN  (.anim-floating-text)
+   ══════════════════════════════════════════════════════════════ */
+.anim-floating-text {
+  position:       absolute;
+  pointer-events: none;
+  font-family:    'Press Start 2P', monospace, sans-serif;
+  font-size:      1.1rem;
+  font-weight:    bold;
+  text-shadow:    0 2px 4px rgba(0,0,0,0.8);
+  z-index:        35;
+  white-space:    nowrap;
+  animation:      floatTextUp 0.9s ease-out forwards;
+}
+
+@keyframes floatTextUp {
+  0%   { opacity: 1; transform: translateY(0)    scale(1);    }
+  40%  { opacity: 1; transform: translateY(-28px) scale(1.15); }
+  100% { opacity: 0; transform: translateY(-55px) scale(0.8); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. TEXTO DE COMBO  (.anim-combo-text)
+   ══════════════════════════════════════════════════════════════ */
+.anim-combo-text {
+  position:       absolute;
+  pointer-events: none;
+  font-family:    'Press Start 2P', monospace, sans-serif;
+  font-size:      0.95rem;
+  font-weight:    bold;
+  text-shadow:    0 0 12px var(--combo-color, #FFD700), 0 2px 4px rgba(0,0,0,0.9);
+  z-index:        36;
+  white-space:    nowrap;
+  animation:      comboTextPop 1.2s ease-out forwards;
+}
+
+@keyframes comboTextPop {
+  0%   { opacity: 0; transform: scale(0.5) translateY(0);    }
+  20%  { opacity: 1; transform: scale(1.3) translateY(-10px); }
+  50%  { opacity: 1; transform: scale(1)   translateY(-25px); }
+  100% { opacity: 0; transform: scale(0.8) translateY(-55px); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7. SPRITES DE ENEMIGOS  (.enemy-sprite)
+   ══════════════════════════════════════════════════════════════ */
+.enemy-sprite {
+  position:      absolute;
+  display:       flex;
+  flex-direction: column;
+  align-items:   center;
+  gap:           3px;
+  cursor:        pointer;
+  user-select:   none;
+  transition:    transform 0.15s;
+  z-index:       15;
+}
+.enemy-sprite:hover { transform: scale(1.05); }
+
+.enemy-emoji {
+  font-size: 2.4rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  transition: filter 0.1s;
+}
+
+.enemy-name {
+  font-size:  0.55rem;
+  color:      #fff;
+  background: rgba(0,0,0,0.55);
+  border-radius: 4px;
+  padding:    1px 5px;
+  white-space: nowrap;
+  font-family: monospace;
+}
+
+.enemy-hp-bar {
+  width:         56px;
+  height:        6px;
+  background:    rgba(255,255,255,0.15);
+  border-radius: 3px;
+  overflow:      hidden;
+  border:        1px solid rgba(255,255,255,0.2);
+}
+
+.enemy-hp-fill {
+  height:     100%;
+  transition: width 0.2s ease;
+  border-radius: 3px;
+}
+
+/* Animación de entrada */
+.enemy-enter {
+  animation: enemyEnter 0.5s ease-out;
+}
+@keyframes enemyEnter {
+  0%   { opacity: 0; transform: scale(0) rotate(-15deg); }
+  70%  { transform: scale(1.15) rotate(3deg); }
+  100% { opacity: 1; transform: scale(1)   rotate(0deg); }
+}
+
+/* Animación de muerte */
+.enemy-die {
+  animation: enemyDie 0.5s ease-in forwards;
+  pointer-events: none;
+}
+@keyframes enemyDie {
+  0%   { opacity: 1; transform: scale(1); filter: brightness(1); }
+  40%  { transform: scale(1.4) rotate(10deg); filter: brightness(5) saturate(0); }
+  100% { opacity: 0; transform: scale(0) rotate(30deg); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8. SACUDIDA AL RECIBIR DAÑO  (.anim-shake)
+      (complementa el .shake-animation ya existente)
+   ══════════════════════════════════════════════════════════════ */
+.anim-shake {
+  animation: shakeSection 0.4s ease-in-out;
+}
+@keyframes shakeSection {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9. LEYENDA DE CONTROLES  (.controls-legend)
+   ══════════════════════════════════════════════════════════════ */
+.controls-legend {
+  display:        flex;
+  align-items:    flex-start;
+  gap:            24px;
+  justify-content: center;
+  flex-wrap:      wrap;
+  padding:        12px;
+  background:     rgba(0,0,0,0.45);
+  border-radius:  12px;
+  border:         1px solid rgba(255,182,225,0.25);
+}
+
+.controls-player h4 {
+  color:       #FFB6E1;
+  font-size:   0.8rem;
+  margin:      0 0 6px;
+  font-family: monospace;
+}
+
+.controls-player ul {
+  list-style: none;
+  padding:    0;
+  margin:     0;
+  font-size:  0.72rem;
+  color:      #ddd;
+  display:    flex;
+  flex-direction: column;
+  gap:        4px;
+}
+
+.controls-divider {
+  align-self:  center;
+  font-size:   1.2rem;
+  font-weight: bold;
+  color:       #FF69B4;
+  text-shadow: 0 0 10px #FF69B4;
+}
+
+kbd {
+  display:       inline-block;
+  padding:       2px 6px;
+  border-radius: 4px;
+  background:    rgba(255,255,255,0.12);
+  border:        1px solid rgba(255,255,255,0.3);
+  font-family:   monospace;
+  font-size:     0.7rem;
+  color:         #fff;
+  min-width:     22px;
+  text-align:    center;
+}
+
+.controls-player .tip {
+  font-size:  0.62rem;
+  opacity:    0.65;
+  font-style: italic;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. INDICADOR DE ESPECIAL CARGADO
+   ══════════════════════════════════════════════════════════════ */
+.special-ready {
+  animation: specialGlow 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes specialGlow {
+  from { box-shadow: 0 0  8px #CC00FF; border-color: #CC00FF; }
+  to   { box-shadow: 0 0 20px #CC00FF, 0 0 40px #FF00AA; border-color: #FF00AA; }
+}

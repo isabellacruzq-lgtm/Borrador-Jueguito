@@ -1,0 +1,157 @@
+/* ============================================================
+   CELESTIAL FURY — animations.css
+   Animaciones y efectos visuales
+   ============================================================ */
+
+/* ── Entrada de página ──────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Latido ─────────────────────────────────────────────────── */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.1); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.07); }
+  56%       { transform: scale(1); }
+}
+
+/* ── Flotar ─────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* ── Brillo / shimmer ───────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* ── Destello de ataque ─────────────────────────────────────── */
+@keyframes attackFlash {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.6; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+/* ── Vibración (daño) ───────────────────────────────────────── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+/* ── Giro de flor ───────────────────────────────────────────── */
+@keyframes spinFlower {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Estrella / sparkle ─────────────────────────────────────── */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50%       { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+/* ── Barra de vida (baja) ───────────────────────────────────── */
+@keyframes healthPulse {
+  0%, 100% { filter: brightness(1); }
+  50%       { filter: brightness(1.3); }
+}
+
+/* ── Partículas de victoria ─────────────────────────────────── */
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CLASES DE UTILIDAD DE ANIMACIÓN
+   ══════════════════════════════════════════════════════════════ */
+
+/* Aplicar en JS con classList.add() */
+
+.anim-fade-in     { animation: fadeIn 0.4s ease both; }
+.anim-fade-in-up  { animation: fadeInUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-fade-in-down{ animation: fadeInDown 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-scale-in    { animation: scaleIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+.anim-float    { animation: float 3s ease-in-out infinite; }
+.anim-heartbeat{ animation: heartbeat 1.6s ease-in-out infinite; }
+.anim-spin     { animation: spinFlower 1s linear infinite; }
+
+.anim-shake    { animation: shake 0.4s ease both; }
+.anim-flash    { animation: attackFlash 0.45s ease both; }
+
+/* Delays de entrada en cascada */
+.anim-delay-1 { animation-delay: 0.1s; }
+.anim-delay-2 { animation-delay: 0.2s; }
+.anim-delay-3 { animation-delay: 0.3s; }
+.anim-delay-4 { animation-delay: 0.4s; }
+
+/* ── Tarjetas de personaje: entrada escalonada ──────────────── */
+.character-card:nth-child(1) { animation: fadeInUp 0.4s 0.05s both; }
+.character-card:nth-child(2) { animation: fadeInUp 0.4s 0.12s both; }
+.character-card:nth-child(3) { animation: fadeInUp 0.4s 0.19s both; }
+.character-card:nth-child(4) { animation: fadeInUp 0.4s 0.26s both; }
+
+/* ── Header del juego ───────────────────────────────────────── */
+.header { animation: fadeInDown 0.5s 0.1s both; }
+.summary-panel { animation: fadeInUp 0.5s 0.35s both; }
+
+/* ── Arena de batalla ───────────────────────────────────────── */
+.battle-arena  { animation: fadeIn 0.6s 0.2s both; }
+.player-section{ animation: scaleIn 0.4s both; }
+
+/* ── Botones de flor ────────────────────────────────────────── */
+.flower-button {
+  animation: fadeInUp 0.4s both;
+}
+.flower-button:nth-child(1) { animation-delay: 0.1s; }
+.flower-button:nth-child(2) { animation-delay: 0.18s; }
+.flower-button:nth-child(3) { animation-delay: 0.26s; }
+
+/* ── Efecto de daño en barra de vida ────────────────────────── */
+.health-fill.damaged {
+  animation: healthPulse 0.4s ease 3;
+}
+
+/* ── Efecto de victoria ─────────────────────────────────────── */
+.victory-text {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 3rem;
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255,215,0,0.8);
+  animation: scaleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both,
+             float 2s 0.5s ease-in-out infinite;
+}
+
+/* ── Sparkle decorativo (error.html) ────────────────────────── */
+.sparkle {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFB6E1, #DDA0DD);
+  animation: sparkle 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
