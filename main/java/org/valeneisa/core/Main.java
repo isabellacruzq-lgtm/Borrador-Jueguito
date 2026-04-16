@@ -1,19 +1,88 @@
 package org.valeneisa.core;
 
 import com.sun.net.httpserver.HttpServer;
+import org.valeneisa.network.*;
+
 import java.awt.Desktop;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 
 public class Main {
+
     public static void main(String[] args) throws IOException {
-        // Working directory es: ...\celestya_fury1\src
-        // Los archivos están en: ...\celestya_fury1\src\resources\static\
+
+        // =========================
+        // 🌐 1. DETECTAR MI IP
+        // =========================
+        String myIp = getLocalIp();
+        System.out.println("🌐 Mi IP detectada: " + myIp);
+
+        // =========================
+        // 🔥 2. CONFIGURACIÓN
+        // =========================
+        String rivalIp = "10.103.195.21"; // 🔥 CAMBIA ESTO EN CADA PC
+        int localUdpPort = 9877;
+        int rivalUdpPort = 9876;
+
+        System.out.println("🎯 Rival configurado: " + rivalIp);
+
+        try {
+            // =========================
+            // 🔥 NETWORK BRIDGE (SIN WS)
+            // =========================
+            NetworkBridge bridge = new NetworkBridge(
+                    localUdpPort,
+                    rivalIp,
+                    rivalUdpPort
+            );
+
+            bridge.start();
+            System.out.println("🌐 Bridge UDP iniciado correctamente");
+
+            // =========================
+            // 🎮 BATTLE CONTROLLER
+            // =========================
+            ISoundPlayer soundPlayer = SoundManager.getInstance();
+
+            BattleController controller = new BattleController(
+                    true,
+                    soundPlayer,
+                    bridge.getUdpManager()
+            );
+
+            BattleControllerHolder.set(controller);
+
+            // 🔗 CONECTAR UDP → CONTROLADOR
+            bridge.onUdpEvent(controller::procesarEntradaRival);
+
+            // =========================
+            // 🧪 PRUEBA AUTOMÁTICA
+            // =========================
+            new Thread(() -> {
+                try {
+                    Thread.sleep(5000);
+                    System.out.println("🔥 Enviando ataque de prueba...");
+                    controller.realizarAtaque(20, "FUEGO");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (Exception e) {
+            System.err.println("❌ Error iniciando NetworkBridge: " + e.getMessage());
+        }
+
+        // =========================
+        // 🌐 4. SERVIDOR HTTP
+        // =========================
         String workDir = System.getProperty("user.dir");
         System.out.println("📁 Carpeta de trabajo detectada en: " + workDir);
 
@@ -24,9 +93,8 @@ public class Main {
             String targetFile = (uriPath.equals("/") || uriPath.isEmpty()) ? "index.html" : uriPath;
             if (targetFile.startsWith("/")) targetFile = targetFile.substring(1);
 
-            // workDir ya ES la carpeta "src", así que buscamos directamente dentro de ella
             String[] carpetasBase = {
-                    workDir + "/src/resources/static/",  // ← agrega esta línea
+                    workDir + "/src/resources/static/",
                     workDir + "/resources/static/",
                     workDir + "/main/resources/static/",
                     workDir + "/resources/",
@@ -57,16 +125,17 @@ public class Main {
 
                 exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
                 exchange.sendResponseHeaders(200, content.length);
+
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(content);
                 }
             } else {
-                System.err.println("❌ No encontré: /" + targetFile + " en " + workDir);
                 exchange.sendResponseHeaders(404, 0);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(("404 - Archivo no encontrado: " + targetFile).getBytes());
                 }
             }
+
             exchange.close();
         });
 
@@ -80,5 +149,29 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // =========================
+    // 🔍 IP AUTOMÁTICA
+    // =========================
+    private static String getLocalIp() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface ni = interfaces.nextElement();
+                if (!ni.isUp() || ni.isLoopback()) continue;
+
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (!addr.isLoopbackAddress() && addr.getHostAddress().contains(".")) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "127.0.0.1";
     }
 }

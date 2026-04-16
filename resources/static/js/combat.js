@@ -238,18 +238,4 @@ document.addEventListener('DOMContentLoaded', () => {
   setBattleStatus('¡Selecciona un ataque para comenzar!');
 });
 
-const dm  = new DifficultyManager().loadSaved();
-const mgr = new EnemyManager('battleEffects', dm.getKey());
-const ctl = new MultiplayerControls({
-  p1: {
-    onAttack:  () => playerAttack('punch'),
-    onSpecial: () => playerAttack('beam'),
-    onCombo:   (n) => console.log('P1 combo x' + n)
-  },
-  p2: { onAttack: () => playerAttack('kick') }
-}, { comboDecayMs: dm.get().comboDecay });
-
-ctl.enable();
-mgr.onEnemyHit  = (enemy, x, y) => AnimationSystem.playHitFX({ container, emoji: '⚡', x, y, color: enemy.color });
-mgr.onEnemyDead = (enemy, x, y) => AnimationSystem.playHitFX({ container, emoji: '💥', x, y, color: enemy.color, destroy: true });
-mgr.spawnWave();
+// Inicialización completada — modo multijugador activo

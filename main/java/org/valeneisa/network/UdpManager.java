@@ -1,122 +1,183 @@
 package org.valeneisa.network;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.io.IOException;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
-/**
- * Gestor de comunicación UDP entre jugadores.
- *
- * <p>Soporta dos instancias en la misma PC usando puertos diferentes:
- * Jugador 1 escucha en 9876 y envía al 9877.
- * Jugador 2 escucha en 9877 y envía al 9876.</p>
- *
- * <p>Principios SOLID aplicados:</p>
- * <ul>
- *   <li><b>S</b> — Solo gestiona el envío y recepción de mensajes UDP.</li>
- *   <li><b>D</b> — El puerto se configura externamente via propiedad del sistema.</li>
- * </ul>
- *
- * @author Celestial Fury Team
- * @version 1.0
- */
 public class UdpManager {
 
-    /** Única instancia Singleton. */
-    private static UdpManager instance;
+    private static final Logger LOG = Logger.getLogger(UdpManager.class.getName());
+    private static final int BUFFER_SIZE = 1024;
+    private static final int PING_INTERVAL_MS = 3000;
 
-    /** IP del jugador destino. */
-    private String ipDestino;
+    private final int localPort;
+    private final InetAddress rivalAddress;
+    private final int rivalPort;
 
-    /**
-     * Puerto local de escucha. Se define con la propiedad del sistema
-     * {@code -DpuertoEscucha=9876} o {@code -DpuertoEscucha=9877}.
-     * Por defecto usa 9876 (Jugador 1).
-     */
-    private final int puertoEscucha;
+    private DatagramSocket socket;
+    private volatile boolean running = false;
 
-    /**
-     * Puerto destino al que se envían los mensajes.
-     * Es el opuesto al puerto de escucha.
-     */
-    private final int puertoDestino;
+    private Consumer<String> messageListener;
+    private Consumer<String> errorListener;
 
-    /**
-     * Constructor privado. Lee el puerto desde las propiedades del sistema.
-     */
-    private UdpManager() {
-        this.puertoEscucha  = Integer.parseInt(System.getProperty("puertoEscucha", "9876"));
-        this.puertoDestino  = (puertoEscucha == 9876) ? 9877 : 9876;
-        System.out.println("[UdpManager] Escucha: " + puertoEscucha + " | Destino: " + puertoDestino);
+    private final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+    public UdpManager(int localPort, String rivalIp, int rivalPort) throws UnknownHostException {
+        this.localPort    = localPort;
+        this.rivalAddress = InetAddress.getByName(rivalIp);
+        this.rivalPort    = rivalPort;
     }
 
-    /**
-     * Retorna la única instancia de {@code UdpManager}.
-     *
-     * @return instancia singleton
-     */
-    public static UdpManager getInstance() {
-        if (instance == null) {
-            instance = new UdpManager();
+    // =========================
+    // START / STOP
+    // =========================
+
+    public void start() throws SocketException {
+        socket  = new DatagramSocket(localPort);
+        running = true;
+
+        executor.submit(this::receiveLoop);
+        executor.submit(this::pingLoop);
+
+        LOG.info("[UDP] Escuchando en puerto " + localPort
+                + " | Rival -> " + rivalAddress.getHostAddress() + ":" + rivalPort);
+    }
+
+    public void stop() {
+        running = false;
+        executor.shutdownNow();
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
         }
-        return instance;
+        LOG.info("[UDP] Conexión cerrada.");
     }
 
-    /**
-     * Establece la IP del jugador destino.
-     *
-     * @param ip dirección IP del rival
-     */
-    public void setIpDestino(String ip) {
-        this.ipDestino = ip;
-        System.out.println("[UdpManager] Objetivo fijado en: " + ip);
-    }
+    // =========================
+    // ENVÍO
+    // =========================
 
-    /**
-     * Envía un mensaje UDP al rival de forma asíncrona.
-     *
-     * @param mensaje cadena a enviar (ej: {@code "ATAQUE:10:Golpe_Basico"})
-     */
-    public void enviarMensaje(String mensaje) {
-        if (ipDestino == null || ipDestino.isEmpty()) {
-            System.err.println("[UdpManager] Error: No hay IP de destino.");
+    public void send(String message) {
+        if (!running) {
+            LOG.warning("[UDP] Intento de envío con conexión cerrada.");
             return;
         }
 
-        new Thread(() -> {
-            try (DatagramSocket socket = new DatagramSocket()) {
-                byte[] buffer = mensaje.getBytes();
-                InetAddress address = InetAddress.getByName(ipDestino);
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, puertoDestino);
-                socket.send(packet);
-                System.out.println("[UdpManager] Enviado: " + mensaje);
-            } catch (Exception e) {
-                System.err.println("[UdpManager] Error al enviar: " + e.getMessage());
-            }
-        }).start();
+        byte[] data = message.getBytes(StandardCharsets.UTF_8);
+        DatagramPacket packet = new DatagramPacket(data, data.length, rivalAddress, rivalPort);
+
+        try {
+            socket.send(packet);
+            LOG.info("[UDP] → " + message);
+        } catch (IOException e) {
+            notifyError("Error al enviar paquete: " + e.getMessage());
+        }
     }
 
-    /**
-     * Inicia la escucha de mensajes UDP en el puerto local asignado.
-     *
-     * @param callback función que procesa cada mensaje recibido
-     */
-    public void iniciarEscucha(Consumer<String> callback) {
-        new Thread(() -> {
-            try (DatagramSocket socket = new DatagramSocket(puertoEscucha)) {
-                byte[] buffer = new byte[1024];
-                System.out.println("[UdpManager] Escuchando en puerto " + puertoEscucha + "...");
+    public void sendAttack(String attackId, int damage) {
+        send("ATTACK|" + attackId + "|" + damage);
+    }
 
-                while (true) {
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(packet);
-                    String recibido = new String(packet.getData(), 0, packet.getLength());
-                    callback.accept(recibido);
+    public void sendHpUpdate(int myHp, int rivalHp) {
+        send("HP_UPDATE|" + myHp + "|" + rivalHp);
+    }
+
+    public void sendTurn(String playerId) {
+        send("TURN|" + playerId);
+    }
+
+    public void sendChat(String text) {
+        send("CHAT|" + text);
+    }
+
+    public void sendSurrender() {
+        send("SURRENDER");
+    }
+
+    // =========================
+    // RECEIVE LOOP
+    // =========================
+
+    private void receiveLoop() {
+        byte[] buffer = new byte[BUFFER_SIZE];
+
+        while (running) {
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
+            try {
+                socket.receive(packet);
+
+                String message = new String(
+                        packet.getData(), 0,
+                        packet.getLength(),
+                        StandardCharsets.UTF_8
+                ).trim();
+
+                LOG.info("[UDP] ← " + message);
+
+                // 🔥 RESPUESTA AUTOMÁTICA PING
+                if (message.startsWith("PING|")) {
+                    String ts = message.split("\\|")[1];
+                    send("PONG|" + ts);
+                    continue;
                 }
-            } catch (Exception e) {
-                System.err.println("[UdpManager] Error en escucha: " + e.getMessage());
+
+                // 🔥 ENVIAR AL BRIDGE
+                if (messageListener != null) {
+                    messageListener.accept(message);
+                }
+
+            } catch (SocketException e) {
+                if (running) notifyError("Socket cerrado inesperadamente: " + e.getMessage());
+                break;
+            } catch (IOException e) {
+                if (running) notifyError("Error al recibir paquete: " + e.getMessage());
             }
-        }).start();
+        }
     }
+
+    // =========================
+    // PING LOOP
+    // =========================
+
+    private void pingLoop() {
+        while (running) {
+            try {
+                Thread.sleep(PING_INTERVAL_MS);
+                send("PING|" + System.currentTimeMillis());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+    }
+
+    // =========================
+    // LISTENERS
+    // =========================
+
+    public void onMessage(Consumer<String> listener) {
+        this.messageListener = listener;
+    }
+
+    public void onError(Consumer<String> listener) {
+        this.errorListener = listener;
+    }
+
+    private void notifyError(String msg) {
+        LOG.warning("[UDP] " + msg);
+        if (errorListener != null) errorListener.accept(msg);
+    }
+
+    // =========================
+    // GETTERS
+    // =========================
+
+    public boolean isRunning()    { return running; }
+    public int getLocalPort()     { return localPort; }
+    public String getRivalIp()    { return rivalAddress.getHostAddress(); }
+    public int getRivalPort()     { return rivalPort; }
 }
